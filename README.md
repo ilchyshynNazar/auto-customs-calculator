@@ -44,7 +44,7 @@ Installation
 
 Clone the repository:
 
-git clone https://github.com/your-username/customs-clearance-calculator.git
+git clone https://github.com/ilchyshynNazar/auto-customs-calculator.git
 cd customs-clearance-calculator
 
 Install dependencies:
@@ -62,7 +62,7 @@ Screenshots
 Add screenshots to the assets folder and reference them like this:
 
 ### Home Page
-![Home](./assets/home.png)
+![Home](./src/assets/home.png)
 
 ### Calculation Result
-![Result](./assets/result.png)
+![Result](./src/assets/result.png)
