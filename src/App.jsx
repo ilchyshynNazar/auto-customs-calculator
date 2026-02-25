@@ -26,10 +26,6 @@ export default function App() {
     }, 500);
   };
 
-  const resetResult = () => {
-    setCalculationResult(null);
-  };
-
   const renderForm = () => {
     switch (vehicleType) {
       case "car": return <CarForm onSubmit={handleFormSubmit} />;

@@ -15,6 +15,12 @@ coverage
 dist-ssr
 *.local
 
+# Local env
+.env
+
+# Production env should be tracked if safe
+!.env.production
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
