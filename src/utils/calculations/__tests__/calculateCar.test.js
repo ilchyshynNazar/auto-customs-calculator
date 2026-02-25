@@ -12,7 +12,7 @@ describe('calculateCarCustoms', () => {
   describe('gasoline car', () => {
     it('should calculate customs for gasoline car under 3000cc', () => {
       const formData = {
-        fuel: "Бензин",
+        fuel: "Бензин",  
         age: "1 рік",
         price: "10000",
         engineVolume: "2000"
