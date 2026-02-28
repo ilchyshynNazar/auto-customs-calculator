@@ -45,21 +45,16 @@ Installation
 Clone the repository:
 
 git clone https://github.com/ilchyshynNazar/auto-customs-calculator.git
+
 cd customs-clearance-calculator
 
 Install dependencies:
-
 npm install
 
 Running the Project
 npm run dev
 
-
 The development server will start locally.
-
-Screenshots
-
-Add screenshots to the assets folder and reference them like this:
 
 ### Home Page
 ![Home](./src/assets/home.png)
