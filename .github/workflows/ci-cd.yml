@@ -16,41 +16,43 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout repo
+      # 1. Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Setup Node.js
+      # 2. Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: 'npm'
 
-      # Install dependencies
+      # 3. Install dependencies including Playwright
       - name: Install dependencies
-        run: npm ci
+        run: |
+          npm ci
+          npx playwright install
 
-      # Run ESLint
+      # 4. Run ESLint
       - name: Run ESLint
         run: npm run lint
 
-      # Run Unit Tests (Vitest)
+      # 5. Run Unit Tests
       - name: Run unit tests
         run: npm run test -- --run
 
-      # Build project
+      # 6. Build project
       - name: Build project
         run: npm run build
 
-      # Start dev server for Playwright E2E tests
+      # 7. Start dev server in background
       - name: Start dev server
         run: npm run dev &
       
-      # Wait until server is ready
+      # 8. Wait until server is ready
       - name: Wait for server
         run: npx wait-on http://localhost:5173
 
-      # Run Playwright E2E tests
+      # 9. Run Playwright E2E tests
       - name: Run Playwright E2E tests
-        run: npm run test:e2e
+        run: npx playwright test --config=playwright.config.js
