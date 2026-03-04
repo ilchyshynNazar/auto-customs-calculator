@@ -86,7 +86,7 @@ describe('calculateCarCustoms', () => {
       };
       const result = calculateCarCustoms(formData);
       expect(result.importDuty).toBe(0);
-      expect(result.exciseTax).toBe(60); // 60 kWh * 1
+      expect(result.exciseTax).toBe(60); // 60 kWh * 1 for electric cars
       expect(result.vat).toBe(0);
       expect(result.totalCost).toBe(20060);
       expect(result.details.fuelType).toBe("Електро");
