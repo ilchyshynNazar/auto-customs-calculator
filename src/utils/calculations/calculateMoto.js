@@ -5,7 +5,7 @@ import { AGE_FACTOR } from './calculationConstants.js';
  * Мита: 10%, Акциз залежить від об'єму двигуна
  */
 export function calculateMotoCustoms(formData) {
-  const { fuel, country, age, price, engineVolume } = formData;
+  const { age, price, engineVolume } = formData;
 
   if (!price || !engineVolume) {
     return null;

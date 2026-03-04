@@ -5,7 +5,7 @@ import { AGE_FACTOR } from './calculationConstants.js';
  * Мита: залежать від вантажопідйомності, Акциз: залежить від палива та маси
  */
 export function calculateTruckCustoms(formData) {
-  const { fuel, country, grossMass, age, price } = formData;
+  const { fuel, grossMass, age, price } = formData;
 
   if (!price) {
     return null;

@@ -31,7 +31,7 @@ function getCarExciseTax(fuel, engineVolume, ageCoefficient) {
  * Розрахунок мита та акцизу для легкового автомобіля
  */
 export function calculateCarCustoms(formData) {
-  const { fuel, country, age, price, engineVolume } = formData;
+  const { fuel, age, price, engineVolume } = formData;
 
   if (!price || !engineVolume) {
     return null;

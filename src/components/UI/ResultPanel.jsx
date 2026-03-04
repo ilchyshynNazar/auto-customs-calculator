@@ -8,6 +8,7 @@ export default function ResultPanel({ result, isLoading, vehicleType }) {
   useEffect(() => {
     if (result && result.formData) {
       const customs = calculateCustoms(vehicleType, result.formData);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCustomsData(customs);
     }
   }, [result, vehicleType]);
