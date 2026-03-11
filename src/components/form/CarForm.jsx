@@ -4,7 +4,7 @@ import InputField from "./common/InputField.jsx";
 import SelectField from "./common/SelectField.jsx";
 import { FuelTypes, CarCountries, CarAges } from "../../utils/constants.js";
 import { validateCarForm } from "../../utils/validators.js";
-import posthog from 'posthog-js'; 
+import posthog from 'posthog-js'; // обов’язково імпортуй PostHog
 
 export default function CarForm({ onSubmit }) {
   const [data, setData] = React.useState({
@@ -16,6 +16,16 @@ export default function CarForm({ onSubmit }) {
   });
 
   const [errors, setErrors] = React.useState({});
+  const [showUrgentFilter, setShowUrgentFilter] = React.useState(false);
+
+  // --- Перевірка Feature Flag через posthog-js ---
+  React.useEffect(() => {
+    posthog.onFeatureFlags(() => {
+      if (posthog.isFeatureEnabled('show-urgent-filter')) {
+        setShowUrgentFilter(true);
+      }
+    });
+  }, []);
 
   const handleChange = (field, value) => {
     setData(prev => ({ ...prev, [field]: value }));
@@ -26,15 +36,16 @@ export default function CarForm({ onSubmit }) {
     e.preventDefault();
     const validationErrors = validateCarForm(data);
     setErrors(validationErrors);
-    
+
     if (Object.values(validationErrors).every(err => err === null)) {
+      // --- Capture подія для аналітики ---
       posthog.capture('car_form_submitted', {
         fuel: data.fuel,
         country: data.country,
         age: data.age,
         price: data.price,
         engine_volume: data.engineVolume,
-        is_authenticated: false, 
+        is_authenticated: false,
       });
 
       if (onSubmit) onSubmit(data);
@@ -64,7 +75,23 @@ export default function CarForm({ onSubmit }) {
   return (
     <form onSubmit={handleSubmit}>
       <CustomFormBase data={data} onChange={handleChange} sharedFields={sharedFields} />
-      <button type="submit" className="mt-6 w-full px-6 py-3 bg-violet-600 rounded-lg text-white font-bold text-lg hover:bg-violet-700 transition">
+
+      {/* --- Feature Flag кнопка "Тільки термінові" --- */}
+      {showUrgentFilter && (
+        <button
+          type="button"
+          id="urgent-btn"
+          className="mt-4 w-full px-6 py-3 bg-red-600 rounded-lg text-white font-bold text-lg hover:bg-red-700 transition"
+          onClick={() => posthog.capture('urgent_filter_clicked')}
+        >
+          Тільки термінові
+        </button>
+      )}
+
+      <button
+        type="submit"
+        className="mt-6 w-full px-6 py-3 bg-violet-600 rounded-lg text-white font-bold text-lg hover:bg-violet-700 transition"
+      >
         Розрахувати
       </button>
     </form>
