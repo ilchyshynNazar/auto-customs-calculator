@@ -2,6 +2,7 @@ import React from "react";
 import CustomFormBase from "./common/CustomFormBase.jsx";
 import { FuelTypes, BusCountries, BusAges } from "../../utils/constants.js";
 import { validateBusForm } from "../../utils/validators.js";
+import posthog from 'posthog-js'; 
 
 export default function BusForm({ onSubmit }) {
   const [data, setData] = React.useState({
@@ -15,21 +16,24 @@ export default function BusForm({ onSubmit }) {
 
   const handleChange = (field, value) => {
     setData(prev => ({ ...prev, [field]: value }));
-
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: null }));
-    }
+    if (errors[field]) setErrors(prev => ({ ...prev, [field]: null }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const validationErrors = validateBusForm(data);
     setErrors(validationErrors);
-    
+
     if (Object.values(validationErrors).every(err => err === null)) {
-      if (onSubmit) {
-        onSubmit(data);
-      }
+      posthog.capture('bus_form_submitted', {
+        fuel: data.fuel,
+        country: data.country,
+        age: data.age,
+        price: data.price,
+        is_authenticated: false, 
+      });
+
+      if (onSubmit) onSubmit(data);
     }
   };
 
@@ -49,7 +53,9 @@ export default function BusForm({ onSubmit }) {
   return (
     <form onSubmit={handleSubmit}>
       <CustomFormBase data={data} onChange={handleChange} sharedFields={sharedFields} />
-      <button type="submit" className="mt-6 w-full px-6 py-3 bg-violet-600 rounded-lg text-white font-bold text-lg hover:bg-violet-700 transition">Розрахувати</button>
+      <button type="submit" className="mt-6 w-full px-6 py-3 bg-violet-600 rounded-lg text-white font-bold text-lg hover:bg-violet-700 transition">
+        Розрахувати
+      </button>
     </form>
   );
 }
