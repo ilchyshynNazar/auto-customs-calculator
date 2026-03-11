@@ -2,7 +2,8 @@ import React from "react";
 import CustomFormBase from "./common/CustomFormBase.jsx";
 import { FuelTypes, BusCountries, BusAges } from "../../utils/constants.js";
 import { validateBusForm } from "../../utils/validators.js";
-import posthog from 'posthog-js'; 
+import posthog from 'posthog-js';
+import * as Sentry from "@sentry/react"; 
 
 export default function BusForm({ onSubmit }) {
   const [data, setData] = React.useState({
@@ -16,7 +17,16 @@ export default function BusForm({ onSubmit }) {
 
   const handleChange = (field, value) => {
     setData(prev => ({ ...prev, [field]: value }));
-    if (errors[field]) setErrors(prev => ({ ...prev, [field]: null }));
+
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: null }));
+    }
+
+    Sentry.addBreadcrumb({
+      category: 'form.input',
+      message: `Changed ${field} to ${value}`,
+      level: 'info'
+    });
   };
 
   const handleSubmit = (e) => {
@@ -25,15 +35,34 @@ export default function BusForm({ onSubmit }) {
     setErrors(validationErrors);
 
     if (Object.values(validationErrors).every(err => err === null)) {
-      posthog.capture('bus_form_submitted', {
-        fuel: data.fuel,
-        country: data.country,
-        age: data.age,
-        price: data.price,
-        is_authenticated: false, 
-      });
+      try {
+        posthog.capture('bus_form_submitted', {
+          fuel: data.fuel,
+          country: data.country,
+          age: data.age,
+          price: data.price,
+          is_authenticated: false, 
+        });
 
-      if (onSubmit) onSubmit(data);
+        Sentry.addBreadcrumb({
+          category: 'form.submit',
+          message: 'Bus form submitted',
+          level: 'info',
+          data: { ...data }
+        });
+
+        if (onSubmit) onSubmit(data);
+      } catch (err) {
+        Sentry.captureException(err);
+        console.error("Error submitting form:", err);
+      }
+    } else {
+      Sentry.addBreadcrumb({
+        category: 'form.validation',
+        message: 'Validation failed',
+        level: 'warning',
+        data: validationErrors
+      });
     }
   };
 
@@ -53,7 +82,10 @@ export default function BusForm({ onSubmit }) {
   return (
     <form onSubmit={handleSubmit}>
       <CustomFormBase data={data} onChange={handleChange} sharedFields={sharedFields} />
-      <button type="submit" className="mt-6 w-full px-6 py-3 bg-violet-600 rounded-lg text-white font-bold text-lg hover:bg-violet-700 transition">
+      <button
+        type="submit"
+        className="mt-6 w-full px-6 py-3 bg-violet-600 rounded-lg text-white font-bold text-lg hover:bg-violet-700 transition"
+      >
         Розрахувати
       </button>
     </form>
