@@ -16,6 +16,15 @@ export default function CarForm({ onSubmit }) {
   });
 
   const [errors, setErrors] = React.useState({});
+  const [showUrgentFilter, setShowUrgentFilter] = React.useState(false);
+
+  React.useEffect(() => {
+    posthog.onFeatureFlags(() => {
+      if (posthog.isFeatureEnabled('show-urgent-filter')) {
+        setShowUrgentFilter(true);
+      }
+    });
+  }, []);
 
   const handleChange = (field, value) => {
     setData(prev => ({ ...prev, [field]: value }));
@@ -26,7 +35,7 @@ export default function CarForm({ onSubmit }) {
     e.preventDefault();
     const validationErrors = validateCarForm(data);
     setErrors(validationErrors);
-    
+
     if (Object.values(validationErrors).every(err => err === null)) {
       posthog.capture('car_form_submitted', {
         fuel: data.fuel,
@@ -34,7 +43,7 @@ export default function CarForm({ onSubmit }) {
         age: data.age,
         price: data.price,
         engine_volume: data.engineVolume,
-        is_authenticated: false, 
+        is_authenticated: false,
       });
 
       if (onSubmit) onSubmit(data);
@@ -64,7 +73,23 @@ export default function CarForm({ onSubmit }) {
   return (
     <form onSubmit={handleSubmit}>
       <CustomFormBase data={data} onChange={handleChange} sharedFields={sharedFields} />
-      <button type="submit" className="mt-6 w-full px-6 py-3 bg-violet-600 rounded-lg text-white font-bold text-lg hover:bg-violet-700 transition">
+
+      {/* --- Feature Flag кнопка "Тільки термінові" --- */}
+      {showUrgentFilter && (
+        <button
+          type="button"
+          id="urgent-btn"
+          className="mt-4 w-full px-6 py-3 bg-red-600 rounded-lg text-white font-bold text-lg hover:bg-red-700 transition"
+          onClick={() => posthog.capture('urgent_filter_clicked')}
+        >
+          Тільки термінові
+        </button>
+      )}
+
+      <button
+        type="submit"
+        className="mt-6 w-full px-6 py-3 bg-violet-600 rounded-lg text-white font-bold text-lg hover:bg-violet-700 transition"
+      >
         Розрахувати
       </button>
     </form>
