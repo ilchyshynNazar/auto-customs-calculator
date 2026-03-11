@@ -4,6 +4,7 @@ import InputField from "./common/InputField.jsx";
 import SelectField from "./common/SelectField.jsx";
 import { FuelTypes, CarCountries, CarAges } from "../../utils/constants.js";
 import { validateCarForm } from "../../utils/validators.js";
+import posthog from 'posthog-js'; 
 
 export default function CarForm({ onSubmit }) {
   const [data, setData] = React.useState({
@@ -18,10 +19,7 @@ export default function CarForm({ onSubmit }) {
 
   const handleChange = (field, value) => {
     setData(prev => ({ ...prev, [field]: value }));
-
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: null }));
-    }
+    if (errors[field]) setErrors(prev => ({ ...prev, [field]: null }));
   };
 
   const handleSubmit = (e) => {
@@ -30,9 +28,16 @@ export default function CarForm({ onSubmit }) {
     setErrors(validationErrors);
     
     if (Object.values(validationErrors).every(err => err === null)) {
-      if (onSubmit) {
-        onSubmit(data);
-      }
+      posthog.capture('car_form_submitted', {
+        fuel: data.fuel,
+        country: data.country,
+        age: data.age,
+        price: data.price,
+        engine_volume: data.engineVolume,
+        is_authenticated: false, 
+      });
+
+      if (onSubmit) onSubmit(data);
     }
   };
 
@@ -59,7 +64,9 @@ export default function CarForm({ onSubmit }) {
   return (
     <form onSubmit={handleSubmit}>
       <CustomFormBase data={data} onChange={handleChange} sharedFields={sharedFields} />
-      <button type="submit" className="mt-6 w-full px-6 py-3 bg-violet-600 rounded-lg text-white font-bold text-lg hover:bg-violet-700 transition">Розрахувати</button>
+      <button type="submit" className="mt-6 w-full px-6 py-3 bg-violet-600 rounded-lg text-white font-bold text-lg hover:bg-violet-700 transition">
+        Розрахувати
+      </button>
     </form>
   );
 }
