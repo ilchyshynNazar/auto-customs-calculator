@@ -4,7 +4,7 @@ import InputField from "./common/InputField.jsx";
 import SelectField from "./common/SelectField.jsx";
 import { FuelTypes, CarCountries, CarAges } from "../../utils/constants.js";
 import { validateCarForm } from "../../utils/validators.js";
-import posthog from 'posthog-js'; // обов’язково імпортуй PostHog
+import posthog from 'posthog-js'; 
 
 export default function CarForm({ onSubmit }) {
   const [data, setData] = React.useState({
@@ -18,7 +18,6 @@ export default function CarForm({ onSubmit }) {
   const [errors, setErrors] = React.useState({});
   const [showUrgentFilter, setShowUrgentFilter] = React.useState(false);
 
-  // --- Перевірка Feature Flag через posthog-js ---
   React.useEffect(() => {
     posthog.onFeatureFlags(() => {
       if (posthog.isFeatureEnabled('show-urgent-filter')) {
@@ -38,7 +37,6 @@ export default function CarForm({ onSubmit }) {
     setErrors(validationErrors);
 
     if (Object.values(validationErrors).every(err => err === null)) {
-      // --- Capture подія для аналітики ---
       posthog.capture('car_form_submitted', {
         fuel: data.fuel,
         country: data.country,
