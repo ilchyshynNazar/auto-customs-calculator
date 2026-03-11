@@ -4,7 +4,8 @@ import InputField from "./common/InputField.jsx";
 import SelectField from "./common/SelectField.jsx";
 import { FuelTypes, CarCountries, CarAges } from "../../utils/constants.js";
 import { validateCarForm } from "../../utils/validators.js";
-import posthog from 'posthog-js'; 
+import posthog from 'posthog-js';
+import * as Sentry from "@sentry/react";
 
 export default function CarForm({ onSubmit }) {
   const [data, setData] = React.useState({
@@ -27,26 +28,34 @@ export default function CarForm({ onSubmit }) {
   }, []);
 
   const handleChange = (field, value) => {
-    setData(prev => ({ ...prev, [field]: value }));
-    if (errors[field]) setErrors(prev => ({ ...prev, [field]: null }));
+    try {
+      setData(prev => ({ ...prev, [field]: value }));
+      if (errors[field]) setErrors(prev => ({ ...prev, [field]: null }));
+    } catch (error) {
+      Sentry.captureException(error);
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const validationErrors = validateCarForm(data);
-    setErrors(validationErrors);
+    try {
+      const validationErrors = validateCarForm(data);
+      setErrors(validationErrors);
 
-    if (Object.values(validationErrors).every(err => err === null)) {
-      posthog.capture('car_form_submitted', {
-        fuel: data.fuel,
-        country: data.country,
-        age: data.age,
-        price: data.price,
-        engine_volume: data.engineVolume,
-        is_authenticated: false,
-      });
+      if (Object.values(validationErrors).every(err => err === null)) {
+        posthog.capture('car_form_submitted', {
+          fuel: data.fuel,
+          country: data.country,
+          age: data.age,
+          price: data.price,
+          engine_volume: data.engineVolume,
+          is_authenticated: false,
+        });
 
-      if (onSubmit) onSubmit(data);
+        if (onSubmit) onSubmit(data);
+      }
+    } catch (error) {
+      Sentry.captureException(error);
     }
   };
 
@@ -73,8 +82,6 @@ export default function CarForm({ onSubmit }) {
   return (
     <form onSubmit={handleSubmit}>
       <CustomFormBase data={data} onChange={handleChange} sharedFields={sharedFields} />
-
-      {/* --- Feature Flag кнопка "Тільки термінові" --- */}
       {showUrgentFilter && (
         <button
           type="button"
@@ -85,7 +92,6 @@ export default function CarForm({ onSubmit }) {
           Тільки термінові
         </button>
       )}
-
       <button
         type="submit"
         className="mt-6 w-full px-6 py-3 bg-violet-600 rounded-lg text-white font-bold text-lg hover:bg-violet-700 transition"

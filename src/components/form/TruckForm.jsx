@@ -2,7 +2,8 @@ import React from "react";
 import CustomFormBase from "./common/CustomFormBase.jsx";
 import { FuelTypes, TruckCountries, TruckAges, TruckGrossMass } from "../../utils/constants.js";
 import { validateTruckForm } from "../../utils/validators.js";
-import posthog from 'posthog-js'; 
+import posthog from 'posthog-js';
+import * as Sentry from "@sentry/react";
 
 export default function TruckForm({ onSubmit }) {
   const [data, setData] = React.useState({
@@ -16,26 +17,34 @@ export default function TruckForm({ onSubmit }) {
   const [errors, setErrors] = React.useState({});
 
   const handleChange = (field, value) => {
-    setData(prev => ({ ...prev, [field]: value }));
-    if (errors[field]) setErrors(prev => ({ ...prev, [field]: null }));
+    try {
+      setData(prev => ({ ...prev, [field]: value }));
+      if (errors[field]) setErrors(prev => ({ ...prev, [field]: null }));
+    } catch (error) {
+      Sentry.captureException(error);
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const validationErrors = validateTruckForm(data);
-    setErrors(validationErrors);
-    
-    if (Object.values(validationErrors).every(err => err === null)) {
-      posthog.capture('truck_form_submitted', {
-        fuel: data.fuel,
-        country: data.country,
-        age: data.age,
-        gross_mass: data.grossMass,
-        price: data.price,
-        is_authenticated: false, 
-      });
+    try {
+      const validationErrors = validateTruckForm(data);
+      setErrors(validationErrors);
+      
+      if (Object.values(validationErrors).every(err => err === null)) {
+        posthog.capture('truck_form_submitted', {
+          fuel: data.fuel,
+          country: data.country,
+          age: data.age,
+          gross_mass: data.grossMass,
+          price: data.price,
+          is_authenticated: false, 
+        });
 
-      if (onSubmit) onSubmit(data);
+        if (onSubmit) onSubmit(data);
+      }
+    } catch (error) {
+      Sentry.captureException(error);
     }
   };
 
@@ -56,7 +65,10 @@ export default function TruckForm({ onSubmit }) {
   return (
     <form onSubmit={handleSubmit}>
       <CustomFormBase data={data} onChange={handleChange} sharedFields={sharedFields} />
-      <button type="submit" className="mt-6 w-full px-6 py-3 bg-violet-600 rounded-lg text-white font-bold text-lg hover:bg-violet-700 transition">
+      <button
+        type="submit"
+        className="mt-6 w-full px-6 py-3 bg-violet-600 rounded-lg text-white font-bold text-lg hover:bg-violet-700 transition"
+      >
         Розрахувати
       </button>
     </form>
