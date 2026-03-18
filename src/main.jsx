@@ -12,7 +12,7 @@ console.log("main.jsx loaded");
 Sentry.init({
   dsn: "https://ebf61b2665133a825cdcf7a9ba8d59ca@o4511027985776640.ingest.de.sentry.io/4511027990364240",
   sendDefaultPii: true, 
-  environment: "production", 
+  environment: "development", 
   integrations: [new BrowserTracing()],
   tracesSampleRate: 1.0, 
 });
