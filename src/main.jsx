@@ -19,7 +19,7 @@ console.log("Root element:", root);
 
 posthog.init('phc_5VCESRqRh3NNFwWvPNxXY1eKCvlPkHDzrKjzsEAe2Pk', {
     api_host: 'https://eu.i.posthog.com',
-    defaults: '2026-01-30'
+    loaded: () => console.log("PostHog initialized"),
 });
 
 ReactDOM.createRoot(root).render(
@@ -27,3 +27,22 @@ ReactDOM.createRoot(root).render(
     <App />
   </React.StrictMode>
 );
+
+window.addEventListener("error", (event) => {
+  Sentry.captureException(event.error, {
+    extra: { info: "Global error caught" }
+  });
+});
+window.addEventListener("unhandledrejection", (event) => {
+  Sentry.captureException(event.reason, {
+    extra: { info: "Unhandled rejection caught" }
+  });
+});
+
+export const captureFormSubmit = (formName, data) => {
+  Sentry.captureMessage(`${formName} submitted`, {
+    level: "info",
+    extra: { ...data },
+  });
+  posthog.capture(`${formName}_submitted`, { ...data });
+};

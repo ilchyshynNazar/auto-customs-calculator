@@ -55,11 +55,9 @@ export default function BusForm({ onSubmit }) {
         console.error("Error submitting form:", err);
       }
     } else {
-      Sentry.addBreadcrumb({
-        category: 'form.validation',
-        message: 'Validation failed',
-        level: 'warning',
-        data: validationErrors
+      Sentry.captureMessage("Bus form validation failed", {
+        level: "warning",
+        extra: { ...validationErrors }
       });
     }
   };
