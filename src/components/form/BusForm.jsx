@@ -44,11 +44,9 @@ export default function BusForm({ onSubmit }) {
           is_authenticated: false, 
         });
 
-        Sentry.addBreadcrumb({
-          category: 'form.submit',
-          message: 'Bus form submitted',
-          level: 'info',
-          data: { ...data }
+        Sentry.captureMessage("Bus form submitted", {
+          level: "info",
+          extra: { ...data }
         });
 
         if (onSubmit) onSubmit(data);
