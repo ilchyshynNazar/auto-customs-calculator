@@ -5,6 +5,7 @@ import "./styles/App.css";
 import "./styles/Gradient.css";
 import posthog from 'posthog-js';
 import * as Sentry from "@sentry/react"; 
+import { BrowserTracing } from "@sentry/tracing";
 
 console.log("main.jsx loaded");
 
@@ -12,6 +13,8 @@ Sentry.init({
   dsn: "https://ebf61b2665133a825cdcf7a9ba8d59ca@o4511027985776640.ingest.de.sentry.io/4511027990364240",
   sendDefaultPii: true, 
   environment: "development", 
+  integrations: [new BrowserTracing()],
+  tracesSampleRate: 1.0, 
 });
 
 const root = document.getElementById("root");
@@ -29,20 +32,13 @@ ReactDOM.createRoot(root).render(
 );
 
 window.addEventListener("error", (event) => {
-  Sentry.captureException(event.error, {
-    extra: { info: "Global error caught" }
-  });
+  Sentry.captureException(event.error, { extra: { info: "Global error caught" } });
 });
 window.addEventListener("unhandledrejection", (event) => {
-  Sentry.captureException(event.reason, {
-    extra: { info: "Unhandled rejection caught" }
-  });
+  Sentry.captureException(event.reason, { extra: { info: "Unhandled rejection caught" } });
 });
 
 export const captureFormSubmit = (formName, data) => {
-  Sentry.captureMessage(`${formName} submitted`, {
-    level: "info",
-    extra: { ...data },
-  });
+  Sentry.captureMessage(`${formName} submitted`, { level: "info", extra: { ...data } });
   posthog.capture(`${formName}_submitted`, { ...data });
 };
